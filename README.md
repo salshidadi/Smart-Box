@@ -35,6 +35,12 @@ ESP device  --POST JSON-->  Flask server  --Socket.IO-->  Web browser
 pip install flask flask-socketio
 python serv.py
 ```
+##3D Design
+
+![Smart box 1](image/smart_box1.png)
+![Smart box 2](image/Smart_box2.png)
+![Smart box 3](image/Smart_box3.png)
+![Smart box 4](image/Smart_box4.gif)
 
 The server runs on port `5000`.
 
