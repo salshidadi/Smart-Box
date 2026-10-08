@@ -16,10 +16,6 @@ A smart box based on the ESP32 microcontroller that measures the fill level, dis
 
 A Flask server that receives sensor data from an ESP over HTTP and forwards it to the web page in real time using Socket.IO.
 
-### Routes
-
-- `GET /` serves the web page (`templates/index.html`).
-- `POST /api/sensor` receives JSON from the ESP, prints it, and broadcasts it to all connected browsers as a `sensor_update` event. It returns `200 OK` on success, or `400 Invalid JSON` if the body is missing or invalid.
 
 ## How It Works
  
