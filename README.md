@@ -41,5 +41,6 @@ The server runs on port `5000`.
 ##3D Design
 
 ![Smart box 1](image/Smart_box1.png)
+![Smart box 2](image/Smart_box2.png)
 ![Smart box 3](image/Smart_Box3.png)
 ![Smart box 4](image/Smart_box4.png)
