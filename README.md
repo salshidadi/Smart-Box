@@ -25,8 +25,7 @@ ESP device  --POST JSON-->  Flask server  --Socket.IO-->  Web browser
 ```
  
 1. The ESP sends sensor readings as JSON to `/api/sensor`.
-2. The server prints the data to the console.
-3. The server broadcasts the data to all connected browsers as a `sensor_update` event.
+2. The server send the JSON to the UI to vizuilize it.
 
 
 ### Run
@@ -38,10 +37,3 @@ python serv.py
 
 The server runs on port `5000`.
 
-### Test
-
-```bash
-curl -X POST http://localhost:5000/api/sensor \
-  -H "Content-Type: application/json" \
-  -d '{"temperature": 24.5, "humidity": 60}'
-```
