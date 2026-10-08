@@ -16,6 +16,7 @@ A smart box based on the ESP32 microcontroller that measures the fill level, dis
 
 A Flask server that receives sensor data from an ESP over HTTP and forwards it to the web page in real time using Socket.IO.
 
+![Smart box dashboard](wep-page.gif)
 
 ## How It Works
  
