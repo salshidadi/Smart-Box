@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Box</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+    <style>
+        :root {
+            --bg: #0c1626;
+            --panel: #14233a;
+            --line: #26395a;
+            --text: #eaf0f8;
+            --muted: #8fa3c0;
+
+            --ok: #5eead4;
+            --warn: #fbbf24;
+            --full: #fb7185;
+
+            --level: var(--ok);
+            --display: "Bricolage Grotesque", "Segoe UI", Tahoma, sans-serif;
+            --body: "IBM Plex Sans", "Segoe UI", Tahoma, sans-serif;
+        }
+        [data-level="warn"] { --level: var(--warn); }
+        [data-level="full"] { --level: var(--full); }
+        [data-level="none"] { --level: var(--line); }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            padding: 24px;
+            background:
+                radial-gradient(900px 500px at 50% -10%, #17304f 0%, transparent 70%),
+                var(--bg);
+            color: var(--text);
+            font-family: var(--body);
+        }
+
+        main { width: min(560px, 100%); }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+            padding: 0 4px;
+        }
+        header h1 {
+            margin: 0;
+            font-family: var(--display);
+            font-weight: 700;
+            font-size: 22px;
+            letter-spacing: -0.01em;
+        }
+        .conn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: var(--muted);
+        }
+        .conn i {
+            width: 9px; height: 9px;
+            border-radius: 50%;
+            background: var(--muted);
+        }
+        .conn.online i { background: var(--ok); box-shadow: 0 0 0 4px rgba(94, 234, 212, .18); }
+        .conn.offline i { background: var(--full); }
+
+        .panel {
+            display: grid;
+            grid-template-columns: 190px 1fr;
+            gap: 28px;
+            align-items: center;
+            padding: 32px;
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 24px;
+        }
+
+        .box { width: 100%; height: auto; display: block; overflow: visible; }
+        .box .shell { fill: #0f1c30; stroke: #3a5380; stroke-width: 3; }
+        .box .level {
+            fill: var(--level);
+            opacity: .9;
+            transition: transform 1.1s cubic-bezier(.3, .8, .3, 1), fill .6s;
+        }
+        .box .wave { fill: var(--level); opacity: .35; transition: transform 1.1s cubic-bezier(.3, .8, .3, 1); }
+        .box .latch { fill: #556f9f; transition: opacity .4s; }
+        .box .lid {
+            fill: #3a5380;
+            transform-box: fill-box;
+            transform-origin: left center;
+            transition: transform .7s cubic-bezier(.3, 1.3, .4, 1);
+        }
+        .box[data-cover="open"] .lid { transform: rotate(-42deg); }
+        .box[data-cover="open"] .latch { opacity: 0; }
+
+        .readout .percent {
+            font-family: var(--display);
+            font-weight: 700;
+            font-size: clamp(64px, 14vw, 88px);
+            line-height: .95;
+            letter-spacing: -0.04em;
+            color: var(--level);
+            transition: color .6s;
+            font-variant-numeric: tabular-nums;
+        }
+        .readout .percent small {
+            font-size: .4em;
+            letter-spacing: 0;
+            margin-left: 2px;
+            opacity: .8;
+        }
+        .readout .verdict {
+            margin: 10px 0 22px;
+            font-size: 17px;
+            color: var(--text);
+        }
+
+        dl { margin: 0; display: grid; gap: 12px; }
+        dl div {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--line);
+            font-size: 15px;
+        }
+        dt { color: var(--muted); }
+        dd { margin: 0; font-weight: 500; }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 3px 12px 3px 10px;
+            border-radius: 999px;
+            border: 1px solid var(--line);
+            font-size: 14px;
+        }
+        .pill::before {
+            content: "";
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: var(--muted);
+        }
+        .pill.closed::before { background: var(--ok); }
+        .pill.open { border-color: var(--warn); color: var(--warn); }
+        .pill.open::before { background: var(--warn); }
+
+        details { margin-top: 16px; padding: 0 4px; color: var(--muted); font-size: 13px; }
+        summary { cursor: pointer; width: fit-content; }
+        summary:focus-visible { outline: 2px solid var(--ok); outline-offset: 3px; border-radius: 4px; }
+        pre {
+            margin: 10px 0 0;
+            padding: 14px;
+            background: #0a1322;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            color: var(--text);
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+            font-size: 13px;
+        }
+
+        @media (max-width: 480px) {
+            .panel { grid-template-columns: 1fr; padding: 24px; justify-items: center; }
+            .box { max-width: 150px; }
+            .readout { width: 100%; text-align: center; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            * { transition: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+<main>
+    <header>
+        <h1 id="title">Smart box</h1>
+        <div class="conn" id="conn"><i></i><span id="conn-text">Connecting…</span></div>
+    </header>
+
+    <section class="panel" id="panel" data-level="none">
+        <svg class="box" id="box" data-cover="closed" viewBox="0 0 170 230" role="img" aria-label="Box fill level">
+            <defs>
+                <clipPath id="inside">
+                    <rect x="20" y="70" width="130" height="144" rx="8"/>
+                </clipPath>
+            </defs>
+            <rect class="shell" x="20" y="70" width="130" height="144" rx="8"/>
+            <g clip-path="url(#inside)">
+                <rect class="level" id="level" x="20" y="70" width="130" height="144" style="transform: translateY(144px)"/>
+                <rect class="wave" id="wave" x="20" y="66" width="130" height="6" style="transform: translateY(144px)"/>
+            </g>
+            <rect class="latch" x="72" y="86" width="26" height="14" rx="4"/>
+            <rect class="lid" x="12" y="54" width="146" height="16" rx="6"/>
+        </svg>
+
+        <div class="readout">
+            <div class="percent"><span id="percent">--</span><small>%</small></div>
+            <p class="verdict" id="verdict">Waiting for the first reading</p>
+            <dl>
+                <div><dt>Lid</dt><dd><span class="pill" id="cover">Unknown</span></dd></div>
+                <div><dt>Last update</dt><dd id="updated">never</dd></div>
+            </dl>
+        </div>
+    </section>
+
+    <details>
+        <summary>Raw data</summary>
+        <pre id="raw">No data yet</pre>
+    </details>
+</main>
+
+<script>
+    const $ = id => document.getElementById(id);
+    const FULL_H = 144;
+    let lastUpdate = null;
+
+    const socket = io();
+
+    function setConn(state, text) {
+        $('conn').className = 'conn ' + state;
+        $('conn-text').textContent = text;
+    }
+    socket.on('connect',    () => setConn('online',  'Live'));
+    socket.on('disconnect', () => setConn('offline', 'Disconnected'));
+
+    function render(data) {
+        const pct = Math.max(0, Math.min(100, Number(data.fill_percentage)));
+        if (!Number.isNaN(pct)) {
+            const y = FULL_H * (1 - pct / 100);
+            $('level').style.transform = `translateY(${y}px)`;
+            $('wave').style.transform  = `translateY(${y}px)`;
+            $('percent').textContent = Math.round(pct);
+
+            let level = 'ok', text = 'Plenty of room';
+            if (pct >= 85)      { level = 'full'; text = 'Almost full'; }
+            else if (pct >= 60) { level = 'warn'; text = 'Getting full'; }
+            $('panel').dataset.level = level;
+            $('verdict').textContent = text;
+        }
+
+        const open = String(data.cover_status || '').toUpperCase() === 'OPEN';
+        const known = !!data.cover_status;
+        $('box').dataset.cover = open ? 'open' : 'closed';
+        const pill = $('cover');
+        pill.textContent = known ? (open ? 'Open' : 'Closed') : 'Unknown';
+        pill.className = 'pill ' + (known ? (open ? 'open' : 'closed') : '');
+
+        if (data.device_id) {
+            $('title').textContent = String(data.device_id)
+                .replace(/_/g, ' ')
+                .replace(/^\w/, c => c.toUpperCase());
+        }
+
+        $('raw').textContent = JSON.stringify(data, null, 2);
+        lastUpdate = Date.now();
+        tick();
+    }
+
+    function tick() {
+        if (!lastUpdate) return;
+        const s = Math.round((Date.now() - lastUpdate) / 1000);
+        $('updated').textContent = s < 5 ? 'just now' : s < 60 ? `${s}s ago` : `${Math.floor(s / 60)} min ago`;
+    }
+    setInterval(tick, 1000);
+
+    socket.on('sensor_update', data => {
+        console.log('received data', data);
+        render(data);
+    });
+</script>
+
+</body>
+</html>
