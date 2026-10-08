@@ -26,7 +26,7 @@ ESP device  --POST JSON-->  Flask server  --Socket.IO-->  Web browser
 ```
  
 1. The ESP sends sensor readings as JSON to `/api/sensor`.
-2. The server send the JSON to the UI to vizuilize it.
+2. The server sends the JSON to the UI to visualize it.
 
 
 ### Run
@@ -35,11 +35,11 @@ ESP device  --POST JSON-->  Flask server  --Socket.IO-->  Web browser
 pip install flask flask-socketio
 python serv.py
 ```
-##3D Design
+## 3D Design
 
-![Smart box 1](image/smart_box1.png)
-![Smart box 2](image/Smart_Box3.png)
-![Smart box 3](image/Smart_box3.png)
+![Smart box 1](image/Smart_box1.png)
+![Smart box 2](image/Smart_box2.png)
+![Smart box 3](image/Smart_Box3.png)
 ![Smart box 4](image/Smart_box4.gif)
 
 The server runs on port `5000`.
