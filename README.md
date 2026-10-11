@@ -43,3 +43,11 @@ The server runs on port `5000`.
 ![Smart box 2](image/Smart_box2.png)
 ![Smart box 3](image/Smart_Box3.png)
 ![Smart box 4](image/Smart_box4.png)
+
+## Contribution
+
+for contribution please follow these rules:
+- Fork the repo
+- Create a new branch called box-fut-[name]
+- commit the branch to the forked repo
+- commit a new PR
