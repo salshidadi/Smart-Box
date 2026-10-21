@@ -25,7 +25,7 @@ ESP device  --POST JSON-->  Flask server  --Socket.IO-->  Web browser
             /api/sensor      (serv.py)     "sensor_update"   (index.html)
 ```
  
-1. The ESP sends sensor readings as JSON to `/api/sensor`.
+1. The ESP32 sends sensor readings as JSON to `/api/sensor`.
 2. The server sends the JSON to the UI to visualize it.
 
 
