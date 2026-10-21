@@ -50,4 +50,4 @@ for contribution please follow these rules:
 - Fork the repo
 - Create a new branch called box-fut-[name]
 - commit the branch to the forked repo
-- commit a new PR
+- commit a new PR.
